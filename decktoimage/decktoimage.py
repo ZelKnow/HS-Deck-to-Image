@@ -144,12 +144,24 @@ def deck_to_image(deck, name, locale='enUS'):
     decklist = master.crop((0,0,243,39*len(cards)))
     master.paste(decklist, (0,97,243,39*len(cards)+97))
     master.paste(imclass, (0,0,243,97))
-    font = ImageFont.truetype(name_font, 24)
-    #title = u'{} {}'.format(name, hero['playerClass'][0]+hero['playerClass'][1:].lower())
     title = name
-    w,h = draw.textsize(title, font=font)
-    draw_shadow(draw, 22, 72-h, title, font)
-    draw.text((22, 72-h), title, font=font)
+    font_locale = ImageFont.truetype(name_font, 24)
+    font_en = ImageFont.truetype(number_font, 24)
+    _,h_locale = draw.textsize(title, font=font_locale)
+    _,h_en = draw.textsize(title, font=font_en)
+    w = 0
+    for i in range(len(title)):
+        if title[i].isdigit() or title[i].islower() or title[i].isupper():
+            font = font_en
+            aw,_ = draw.textsize(title[i], font=font)
+            draw_shadow(draw, 22+w, 72-h_en, title[i], font)
+            draw.text((22+w, 72-h_en), title[i], font=font)
+        else:
+            font = font_locale
+            aw,_ = draw.textsize(title[i], font=font)
+            draw_shadow(draw, 22+w, 72-h_locale, title[i], font)
+            draw.text((22+w, 72-h_locale), title[i], font=font)
+        w+=aw
     return master
 
 def merge(imgs):

@@ -1,1 +1,1 @@
-{"zhCN": {"font_sizes": [17, 21], "bound": 7, "deck_font": "fangzhenglibian.ttf", "name_font": "fangzhenglibian.ttf"}, "enUS": {"font_sizes": [12, 13], "bound": 22, "deck_font": "Belwe-Bold.ttf", "name_font": "Belwe-Bold.ttf"}}
+{"zhCN": {"font_sizes": [16, 18, 19, 21], "bounds": [9, 8, 7, 0], "deck_font": "fangzhenglibian.ttf", "name_font": "fangzhenglibian.ttf"}, "enUS": {"font_sizes": [12, 13, 14], "bounds": [22, 20, 0], "deck_font": "Belwe-Bold.ttf", "name_font": "Belwe-Bold.ttf"}}

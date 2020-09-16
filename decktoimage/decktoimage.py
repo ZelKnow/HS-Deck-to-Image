@@ -109,11 +109,11 @@ def deck_to_image(deck, name, locale='enUS'):
         draw = ImageDraw.Draw(master)
 
         font_sizes = cfg[locale]['font_sizes']
-        bound = cfg[locale]['bound']
-        if len(card['name'])>bound:
-            deck_font_size = font_sizes[0]
-        else:
-            deck_font_size = font_sizes[1]
+        bounds = cfg[locale]['bounds']
+        for i in range(len(font_sizes)):
+            if len(card['name'])>bounds[i]:
+                deck_font_size = font_sizes[i]
+                break
 
         deck_font = 'resources/'+cfg[locale]['deck_font']
         name_font = 'resources/'+cfg[locale]['name_font']
@@ -136,7 +136,7 @@ def deck_to_image(deck, name, locale='enUS'):
             bg = Image.open(tile_container_open)
             master.paste(bg, (0,39*index, 239, 39*(index+1)), bg)
         msg = str(card['cost'])
-        font = ImageFont.truetype(number_font, 22)
+        font = ImageFont.truetype(number_font, 25)
         w, h = draw.textsize(msg, font=font)
         draw_shadow(draw,(44-w)/2,(39-h)/2+39*index,str(card['cost']), font)
         draw.text(((44-w)/2, (39-h)/2+39*index), str(card['cost']), font=font)

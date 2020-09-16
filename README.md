@@ -19,39 +19,41 @@ After this is done, download cards.collectible.json and put it to your resources
 ```
 git clone https://github.com/rikumiyao/HS-Deck-to-Image.git
 cd decktoimage
+python setup.py
 git clone https://github.com/HearthSim/hs-card-tiles
-curl -L https://api.hearthstonejson.com/v1/latest/enUS/cards.collectible.json > resources/cards.collectible.json
 ```
 When you want to update the tiles, pull from the hs-card-tiles repo:
 ```
 cd decktoimage/hs-card-tiles
 git pull origin master
 ```
-If you want to update cards.collectible.json, run the curl command again.
+If you want to update cards.collectible.json, run the `setup.py` again.
 
 ## Usage
 
 ```
-Usage: decktoimage.py [-h] [--ordered] [--code-dest CODE_DEST]
-                      {deckcsv,battlefy,smashgg} sourceFile destination
+usage: decktoimage.py [-h] [--ordered] [--code-dest CODE_DEST]
+                      [--locale {zhCN,enUS}]
+                      {deckcsv,battlefy,smashgg} source destination
 
-create deck images from a csv file
+Create deck images from a csv file
 
 positional arguments:
   {deckcsv,battlefy,smashgg}
                         The type of source the decklists are from
-  sourceFile            Where to get the decklists from. For the deckcsv
+  source                Where to get the decklists from. For the deckcsv
                         option, specify a csv file in your path. For the other
                         2 options, specify the bracket url of their respective
                         websites
-  destination           where the images are generated
+  destination           Where the images are generated
 
 optional arguments:
   -h, --help            show this help message and exit
-  --ordered             set whether images should be grouped by the first
+  --ordered             Set whether images should be grouped by the first
                         letter of the key
   --code-dest CODE_DEST
                         When set, output the deck codes to a csv file instead
+  --locale {zhCN,enUS}  The image language
 ```
 
 ## CSV formatting

@@ -121,9 +121,10 @@ def deck_to_image(deck, name, locale='enUS', handle=None):
 
         deck_font = 'resources/'+cfg[locale]['deck_font']
         name_font = 'resources/'+cfg[locale]['name_font']
+        base = cfg[locale]['base']
         font = ImageFont.truetype(deck_font, deck_font_size)
-        draw_shadow(draw, 45, 20-deck_font_size/2+39*index, card['name'],font)
-        draw.text((45, 20-deck_font_size/2+39*index), card['name'], font=font)
+        draw_shadow(draw, 45, base-deck_font_size/2+39*index, card['name'],font)
+        draw.text((45, base-deck_font_size/2+39*index), card['name'], font=font)
 
         if count==2:
             bg = Image.open(tile_container_number)

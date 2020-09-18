@@ -33,7 +33,7 @@ If you want to update cards.collectible.json, run the `setup.py` again.
 
 ```
 usage: decktoimage.py [-h] [--ordered] [--code-dest CODE_DEST]
-                      [--locale {zhCN,enUS}]
+                      [--locale {zhCN,enUS}] [--watermark WATERMARK]
                       {deckcsv,battlefy,smashgg} source destination
 
 Create deck images from a csv file
@@ -54,6 +54,8 @@ optional arguments:
   --code-dest CODE_DEST
                         When set, output the deck codes to a csv file instead
   --locale {zhCN,enUS}  The image language
+  --watermark WATERMARK
+                        The handle of your social account
 ```
 
 ## CSV formatting

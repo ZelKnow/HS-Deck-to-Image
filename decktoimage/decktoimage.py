@@ -13,6 +13,7 @@ import argparse
 import re
 import requests
 from html.parser import HTMLParser
+import time
 
 # https://github.com/HearthSim/hs-card-tiles
 tile_loc = 'hs-card-tiles/Tiles/'
@@ -70,7 +71,7 @@ def parse_deck(text):
             continue
     return None
 
-def deck_to_image(deck, name, locale='enUS'):
+def deck_to_image(deck, name, locale='enUS', handle=None):
     if locale not in card_dict:
         initial_card_dict(locale)
     if deck.heroes[0] not in card_dict[locale]:
@@ -80,7 +81,10 @@ def deck_to_image(deck, name, locale='enUS'):
     cards = [(card_dict[locale][x[0]],x[1]) for x in deck.cards]
     cards.sort(key = lambda x:(x[0]['cost'], x[0]['name']))
     width = 243
-    height = 39 * len(cards) + imclass.size[1]
+    if handle is None: 
+        height = 39 * len(cards) + imclass.size[1]
+    else:
+        height = 39 * len(cards) + imclass.size[1] + 30
     
     master = Image.new('RGBA', (width, height))
     for index, (card, count) in enumerate(cards):
@@ -118,8 +122,8 @@ def deck_to_image(deck, name, locale='enUS'):
         deck_font = 'resources/'+cfg[locale]['deck_font']
         name_font = 'resources/'+cfg[locale]['name_font']
         font = ImageFont.truetype(deck_font, deck_font_size)
-        draw_shadow(draw, 45, 21-deck_font_size/2+39*index, card['name'],font)
-        draw.text((45, 21-deck_font_size/2+39*index), card['name'], font=font)
+        draw_shadow(draw, 45, 20-deck_font_size/2+39*index, card['name'],font)
+        draw.text((45, 20-deck_font_size/2+39*index), card['name'], font=font)
 
         if count==2:
             bg = Image.open(tile_container_number)
@@ -140,9 +144,19 @@ def deck_to_image(deck, name, locale='enUS'):
         w, h = draw.textsize(msg, font=font)
         draw_shadow(draw,(44-w)/2,(39-h)/2+39*index,str(card['cost']), font)
         draw.text(((44-w)/2, (39-h)/2+39*index), str(card['cost']), font=font)
+    if handle is not None:
+        font = ImageFont.truetype(number_font, 17)
+        handle = handle + ' ' + time.strftime("%Y.%m.%d", time.localtime()) 
+        w_h, _ = draw.textsize(handle, font=font)
+        draw_shadow(draw, 240-w_h, 39*(index+1)+10, handle ,font)
+        draw.text((240-w_h, 39*(index+1)+10), handle, font=font, fill = (255, 255, 255))
     draw = ImageDraw.Draw(master)
-    decklist = master.crop((0,0,243,39*len(cards)))
-    master.paste(decklist, (0,97,243,39*len(cards)+97))
+    if handle is None:
+        decklist = master.crop((0,0,243,39*len(cards)))
+        master.paste(decklist, (0,97,243,39*len(cards)+97))
+    else:
+        decklist = master.crop((0,0,243,39*len(cards)+30))
+        master.paste(decklist, (0,97,243,39*len(cards)+97+30))
     master.paste(imclass, (0,0,243,97))
     title = name
     font_locale = ImageFont.truetype(name_font, 24)
@@ -193,13 +207,16 @@ def write_to_csv(deck_dict, code_dest):
         for name in deck_dict:
             f.write('{},{}\n'.format(name, ','.join(deck_dict[name])))
 
-def generate_images(deck_dict, dest, ordered=False, locale='enUS'):
+def generate_images(deck_dict, dest, ordered=False, locale='enUS', handle=None):
     for name in deck_dict:
         deck_imgs = []
         for deckcode in deck_dict[name]:
             deck = Deck.from_deckstring(deckcode)
             if deck != None:
-                img = deck_to_image(deck, name, locale)
+                if len(deck_imgs)+1==len(deck_dict[name]):
+                    img = deck_to_image(deck, name, locale, handle)
+                else:
+                    img = deck_to_image(deck, name, locale)
                 deck_imgs.append(img)
         if len(deck_imgs)==0:
             print('Player {} has no decks'.format(name))
@@ -215,7 +232,7 @@ def generate_images(deck_dict, dest, ordered=False, locale='enUS'):
         else:
             img.save(u'{}/{}.jpg'.format(dest,name), 'JPEG')
 
-def decks_from_csv(decklists, dest, ordered=False, code_dest=None, locale='enUS'):
+def decks_from_csv(decklists, dest, ordered=False, code_dest=None, locale='enUS', handle=None):
     if ordered:
         setup_dirs(dest)
     deck_dict = {}
@@ -258,9 +275,9 @@ def decks_from_csv(decklists, dest, ordered=False, code_dest=None, locale='enUS'
     if code_dest:
         write_to_csv(deck_dict, code_dest)
     else:
-        generate_images(deck_dict, dest, ordered, locale)
+        generate_images(deck_dict, dest, ordered, locale, handle)
 
-def decks_from_battlefy(battlefy_url, dest, ordered=False, code_dest=None, locale='enUS'):
+def decks_from_battlefy(battlefy_url, dest, ordered=False, code_dest=None, locale='enUS', handle=None):
     if ordered:
         setup_dirs(dest)
     deck_dict = {}
@@ -301,7 +318,7 @@ def decks_from_battlefy(battlefy_url, dest, ordered=False, code_dest=None, local
     if code_dest:
         write_to_csv(deck_dict, code_dest)
     else:
-        generate_images(deck_dict, dest, ordered, locale)
+        generate_images(deck_dict, dest, ordered, locale, handle)
 
 class SmashHTMLParser(HTMLParser):
     def __init__(self):
@@ -312,7 +329,7 @@ class SmashHTMLParser(HTMLParser):
         if data.strip().startswith("window.bootstrappedData="):
             self.extracted = data.strip()[len('window.bootstrappedData='):-1]
 
-def decks_from_smashgg(bracket_url, dest, ordered=False, code_dest=None, locale='enUS'):
+def decks_from_smashgg(bracket_url, dest, ordered=False, code_dest=None, locale='enUS', handle=None):
     if ordered:
         setup_dirs(dest)
     deck_dict = {}
@@ -343,7 +360,7 @@ def decks_from_smashgg(bracket_url, dest, ordered=False, code_dest=None, locale=
     if code_dest:
         write_to_csv(deck_dict, code_dest)
     else:
-        generate_images(deck_dict, dest, ordered, locale)
+        generate_images(deck_dict, dest, ordered, locale, handle)
 
 if __name__=="__main__":
     parser = argparse.ArgumentParser(description="Create deck images from a csv file")
@@ -353,11 +370,12 @@ if __name__=="__main__":
     parser.add_argument("--ordered", help="Set whether images should be grouped by the first letter of the key", action="store_true")
     parser.add_argument("--code-dest", help="When set, output the deck codes to a csv file instead")
     parser.add_argument("--locale", choices=supported_locale, help="The image language", default="enUS")
+    parser.add_argument("--watermark", help="The handle of your social account")
     args = parser.parse_args()
     if args.sourceType == 'battlefy':
-        decks_from_battlefy(args.source, args.destination, ordered=args.ordered, code_dest=args.code_dest, locale=args.locale)
+        decks_from_battlefy(args.source, args.destination, ordered=args.ordered, code_dest=args.code_dest, locale=args.locale, handle=args.watermark)
     elif args.sourceType == 'smashgg':
-        decks_from_smashgg(args.source, args.destination, ordered=args.ordered, code_dest=args.code_dest, locale=args.locale)
+        decks_from_smashgg(args.source, args.destination, ordered=args.ordered, code_dest=args.code_dest, locale=args.locale, handle=args.watermark)
     else:
-        decks_from_csv(args.source, args.destination, ordered=args.ordered, code_dest=args.code_dest, locale=args.locale)
+        decks_from_csv(args.source, args.destination, ordered=args.ordered, code_dest=args.code_dest, locale=args.locale, handle=args.watermark)
 
